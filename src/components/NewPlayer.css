@@ -1,0 +1,14 @@
+
+input {
+    border: 1px solid white;
+    outline: none;
+}
+
+div#new-player {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+div.grid-cell label {
+    margin-right: 5px;
+}
+

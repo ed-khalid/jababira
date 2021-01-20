@@ -1,0 +1,22 @@
+mutation CreatePlayer($player:NewPlayer!) {
+  CreatePlayer(player:$player) {
+    id
+    firstName
+    lastName
+    dob 
+    picture
+    attributes {
+        position
+        gk
+        team 
+        speed
+        dribble
+        pass 
+        shoot
+        defense
+        stamina
+        iq
+        head
+    }
+  }
+}

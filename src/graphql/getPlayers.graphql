@@ -1,0 +1,18 @@
+query GetPlayers{
+  players{
+    id
+    firstName
+    lastName
+    picture 
+    dob
+    attributes {
+   	  position 
+      head 
+      defense
+      pass
+      shoot 
+      dribble 
+      iq 
+    }
+  }
+}
