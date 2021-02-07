@@ -5,10 +5,49 @@ input {
 }
 
 div#new-player {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2,1fr);
     gap: 12px;
 }
 div.grid-cell label {
     margin-right: 5px;
 }
+div#position-cell {
+    grid-column: 1/ -1;
+}
+div#buttons {
+    grid-row: 4;
+    grid-column: 1 / -1;
+}
+div#buttons div#buttons-wrapper {
+    width: 50%;
+    margin: 0 auto;
+    align-content: space-between;
+    justify-content:center;
+}
 
+div#attributes {
+    grid-column : 1/-1;
+}
+
+div#attribute-wrapper {
+    width: 80%;
+    margin: 0 auto;
+}
+
+button {
+    width: 100px;
+    height: 20px;
+}
+
+button:disabled {
+    cursor:not-allowed;
+    color:bisque;
+    background-color: grey;
+}
+button:disabled:hover {
+    cursor:not-allowed;
+    color:bisque;
+    background-color: grey;
+    border: 1px solid white;
+    transition: unset;
+}

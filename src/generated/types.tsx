@@ -13,10 +13,44 @@ export type Scalars = {
   Float: number;
 };
 
+export enum Color {
+  Black = 'BLACK',
+  White = 'WHITE',
+  Red = 'RED'
+}
+
+export type ExistingPlayer = {
+  id: Scalars['String'];
+  firstName?: Maybe<Scalars['String']>;
+  lastName?: Maybe<Scalars['String']>;
+  dob?: Maybe<Scalars['String']>;
+  picture?: Maybe<Scalars['String']>;
+  attributes?: Maybe<ExistingPlayerAttributes>;
+};
+
+export type ExistingPlayerAttributes = {
+  position?: Maybe<Position>;
+  speed?: Maybe<Scalars['Int']>;
+  dribble?: Maybe<Scalars['Int']>;
+  pass?: Maybe<Scalars['Int']>;
+  gk?: Maybe<Scalars['Int']>;
+  team?: Maybe<Scalars['Int']>;
+  stamina?: Maybe<Scalars['Int']>;
+  shoot?: Maybe<Scalars['Int']>;
+  defense?: Maybe<Scalars['Int']>;
+  head?: Maybe<Scalars['Int']>;
+  iq?: Maybe<Scalars['Int']>;
+};
+
 export type League = {
   __typename?: 'League';
   id: Scalars['String'];
   name: Scalars['String'];
+};
+
+export type Lookup = {
+  __typename?: 'Lookup';
+  venues?: Maybe<Array<Venue>>;
 };
 
 export type Match = {
@@ -25,23 +59,37 @@ export type Match = {
   name: Scalars['String'];
   location: Venue;
   type: MatchType;
+  squads: Array<Squad>;
   league?: Maybe<League>;
 };
 
 export enum MatchType {
   Casual = 'CASUAL',
+  Friendly = 'FRIENDLY',
   League = 'LEAGUE'
 }
 
 export type Mutation = {
   __typename?: 'Mutation';
   CreatePlayer: Player;
+  UpdatePlayer: Player;
 };
 
 
 export type MutationCreatePlayerArgs = {
   player: NewPlayer;
 };
+
+
+export type MutationUpdatePlayerArgs = {
+  player: ExistingPlayer;
+};
+
+export enum Nationality {
+  Iraq = 'IRAQ',
+  Sudan = 'SUDAN',
+  Libya = 'LIBYA'
+}
 
 export type NewPlayer = {
   firstName: Scalars['String'];
@@ -100,13 +148,31 @@ export enum Position {
 export type Query = {
   __typename?: 'Query';
   players?: Maybe<Array<Player>>;
+  lookups: Lookup;
+};
+
+export type Squad = {
+  __typename?: 'Squad';
+  id: Scalars['String'];
+  name: Scalars['String'];
+  color?: Maybe<Color>;
+  dominantNationality?: Maybe<Nationality>;
+  hasUnknownPlayers?: Maybe<Scalars['Boolean']>;
+  players?: Maybe<Array<Player>>;
 };
 
 export type Venue = {
   __typename?: 'Venue';
   id: Scalars['String'];
   name: Scalars['String'];
+  address: Scalars['String'];
+  type: VenueType;
 };
+
+export enum VenueType {
+  Indoor = 'INDOOR',
+  Outdoor = 'OUTDOOR'
+}
 
 export type CreatePlayerMutationVariables = Exact<{
   player: NewPlayer;
@@ -135,9 +201,23 @@ export type GetPlayersQuery = (
     & Pick<Player, 'id' | 'firstName' | 'lastName' | 'picture' | 'dob'>
     & { attributes: (
       { __typename?: 'PlayerAttributes' }
-      & Pick<PlayerAttributes, 'position' | 'head' | 'defense' | 'pass' | 'shoot' | 'dribble' | 'iq'>
+      & Pick<PlayerAttributes, 'gk' | 'position' | 'head' | 'defense' | 'speed' | 'team' | 'stamina' | 'pass' | 'shoot' | 'dribble' | 'iq'>
     ) }
   )>> }
+);
+
+export type GetLookupsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetLookupsQuery = (
+  { __typename?: 'Query' }
+  & { lookups: (
+    { __typename?: 'Lookup' }
+    & { venues?: Maybe<Array<(
+      { __typename?: 'Venue' }
+      & Pick<Venue, 'id' | 'name' | 'address' | 'type'>
+    )>> }
+  ) }
 );
 
 
@@ -199,9 +279,13 @@ export const GetPlayersDocument = gql`
     picture
     dob
     attributes {
+      gk
       position
       head
       defense
+      speed
+      team
+      stamina
       pass
       shoot
       dribble
@@ -235,3 +319,40 @@ export function useGetPlayersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions
 export type GetPlayersQueryHookResult = ReturnType<typeof useGetPlayersQuery>;
 export type GetPlayersLazyQueryHookResult = ReturnType<typeof useGetPlayersLazyQuery>;
 export type GetPlayersQueryResult = Apollo.QueryResult<GetPlayersQuery, GetPlayersQueryVariables>;
+export const GetLookupsDocument = gql`
+    query GetLookups {
+  lookups {
+    venues {
+      id
+      name
+      address
+      type
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetLookupsQuery__
+ *
+ * To run a query within a React component, call `useGetLookupsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetLookupsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetLookupsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetLookupsQuery(baseOptions?: Apollo.QueryHookOptions<GetLookupsQuery, GetLookupsQueryVariables>) {
+        return Apollo.useQuery<GetLookupsQuery, GetLookupsQueryVariables>(GetLookupsDocument, baseOptions);
+      }
+export function useGetLookupsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetLookupsQuery, GetLookupsQueryVariables>) {
+          return Apollo.useLazyQuery<GetLookupsQuery, GetLookupsQueryVariables>(GetLookupsDocument, baseOptions);
+        }
+export type GetLookupsQueryHookResult = ReturnType<typeof useGetLookupsQuery>;
+export type GetLookupsLazyQueryHookResult = ReturnType<typeof useGetLookupsLazyQuery>;
+export type GetLookupsQueryResult = Apollo.QueryResult<GetLookupsQuery, GetLookupsQueryVariables>;

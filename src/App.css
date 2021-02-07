@@ -11,9 +11,9 @@
   display:flex;
 }
 div#app {
-  display:flex;
-  flex-direction: column;
   height: 100vh;
+  grid-template-columns: repeat(12, 1fr); 
+  grid-template-rows: 200px auto;
 }
 
 button {
@@ -32,7 +32,7 @@ button:hover {
   cursor: pointer;
 }
 header {
-  background-color: #282c34;
+  grid-column: 1 / -1 ;
   min-height: 10vh;
   display: flex;
   flex-direction: column;
@@ -40,33 +40,28 @@ header {
   flex: 0 1 auto; 
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: white;
+}
+div.card {
+  border: 1px solid white;
+  margin: auto 0;
+  grid-column: span 4;
+  grid-row: span 4; 
 }
 section#main {
+  grid-column: 2 / -1; 
   margin-top: 5px; 
+  width: 100%;
   display: flex;
+  flex-direction: column;
   flex: 1 1 auto; 
-  justify-content: center;
   background-color: #282c34;
 }
 div#main-controls {
   margin-top: 5px;
+  margin: 0 auto; 
   height: 30vh;
 }
 
 div#main-section {
-
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  margin: 0 auto;
 }

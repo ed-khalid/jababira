@@ -6,9 +6,13 @@ query GetPlayers{
     picture 
     dob
     attributes {
+      gk
    	  position 
       head 
       defense
+      speed
+      team
+      stamina
       pass
       shoot 
       dribble 

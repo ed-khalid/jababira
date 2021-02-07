@@ -1,24 +1,93 @@
 import './App.css';
-import { useState } from 'react';
-import { NewPlayer } from './components/NewPlayer';
+import React, { useEffect, useState } from 'react';
+import { PlayerEditor } from './components/NewPlayer';
+import { Player, useGetLookupsQuery, useGetPlayersQuery } from './generated/types';
+import { PlayerList } from './components/PlayerList';
+import { SquadMaker } from './components/SquadMaker';
+import { MatchMaker } from './components/MatchMaker';
+import { Card } from './components/Card';
 
+export type PlayerFull = Player & { isFree:boolean }   
 
 export const App = () => {
 
-  const [isCreatingPlayer, setIsCreatingPlayer] = useState<boolean>();
+  const [isCreatingPlayer, setIsCreatingPlayer] = useState<boolean>(false);
+  const [isMakingTeams, setIsMakingTeams] = useState<boolean>(false);
+  const [showControls, setShowControls] = useState<boolean>(true);
+  const [showNewMatch, setShowNewMatch] = useState<boolean>(false);
+  const [black, setBlack] = useState<Array<Player>>([])
+  const [white, setWhite] = useState<Array<Player>>([])
+  const [player, setPlayer] = useState<Player>();
+  const [players, setPlayers] = useState<Array<PlayerFull>>([])
+  const lookups = useGetLookupsQuery()   
+  const { data } = useGetPlayersQuery() 
+  
+  useEffect(() => {
+    if (data && data.players) {
+      const players:Array<PlayerFull> = data.players.map( it => ({...it, isFree:true}))   
+      setPlayers(players)
+    }
+  }, [data])
+
+  useEffect(() => {
+    if (player) {
+      setIsCreatingPlayer(true)
+    }
+
+  }, [player])
 
   const createPlayer = () => {
     setIsCreatingPlayer(true)
+    setShowControls(false)
+  } 
+  const makeTeams =  () => {
+    setIsMakingTeams(true)
+    setShowControls(false)
+  }
+
+  const createMatch = () => {
+    setShowNewMatch(true)
   } 
 
-  return <div id ="app">
+  const togglePlayer =  (player:PlayerFull) => {
+    if (data && data.players) {
+      const isInBlack = black.find(it => it.id === player.id)  
+      const isInWhite = white.find(it => it.id === player.id)  
+      if (!isInBlack && !isInWhite) {
+        setBlack([...black, player])
+        const _players = players.filter(it => it.id !== player.id)   
+        player.isFree = false
+        setPlayers([..._players, player ])
+      }
+      else if (isInBlack) {
+        setBlack(black.filter(it => it.id !== player.id))
+        setWhite([...white, player])
+      } else {
+        setWhite(white.filter(it => it.id !== player.id))
+        const _players = players.filter(it => it.id !== player.id)   
+        player.isFree = true
+        setPlayers([..._players, player ])
+      } 
+    }
+  }
+
+  return <div id ="app" className="grid">
     <header>Jababira</header>
+    <section id="sidebar">
+      {data?.players && <PlayerList showPlayer={setPlayer} players={players} togglePlayer={togglePlayer} ></PlayerList>}
+    </section>
     <section id="main">
-      <div id="main-controls">
-        {!isCreatingPlayer && <button onClick={() => createPlayer()}>New Player</button>}
-      </div>
+      {showControls && <div id="main-controls">
+        <button onClick={() => createPlayer()}>New Player</button>
+        <button onClick={() => createMatch()}>New Match</button>
+        <button onClick={() => makeTeams()}>Make Teams</button>
+      </div>}
       <div id="main-section">
-          {isCreatingPlayer && <NewPlayer></NewPlayer>}
+          {isCreatingPlayer && <PlayerEditor existingPlayer={player} onClose={setIsCreatingPlayer}  ></PlayerEditor>}
+          {/* {isMakingTeams && <SquadMaker black={black} white={white}></SquadMaker>} */}
+          {showNewMatch && <Card header="New Match">
+            <MatchMaker lookupsData={lookups.data}></MatchMaker>
+            </Card> }
       </div>
     </section>
   </div>

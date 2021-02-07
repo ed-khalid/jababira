@@ -1,13 +1,25 @@
-import { useEffect, useState } from "react";
-import { NewPlayer as NewPlayerType, NewPlayerAttributes, Position, useCreatePlayerMutation} from "../generated/types";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { GetPlayersDocument, GetPlayersQuery, NewPlayer as NewPlayerType, NewPlayerAttributes, Player, Position, useCreatePlayerMutation} from "../generated/types";
 import { AttributeSelector } from "./AttributeSelector";
 import './NewPlayer.css'
 
+interface Props {
+    onClose:Dispatch<SetStateAction<boolean>>;
+    existingPlayer:Player|undefined
+}
 
 
-export const NewPlayer = () => {
+export const PlayerEditor = ({existingPlayer, onClose}:Props) => {
 
-    const [createPlayer, createPlayerResults] = useCreatePlayerMutation()
+    const [createPlayer, ] = useCreatePlayerMutation()
+    const [position, setPosition] = useState<Position>() 
+
+    useEffect(() => {
+        if (existingPlayer) {
+            setPosition(existingPlayer.attributes.position)
+        }
+
+    }, [existingPlayer])
 
     const numberAttributes:Array<keyof(NewPlayerAttributes)> = [
         'gk',
@@ -21,8 +33,7 @@ export const NewPlayer = () => {
         'defense',
         'head'
     ] 
-
-    const [player, setPlayer] = useState<NewPlayerType>({
+    const blankPlayer:NewPlayerType = {
         firstName: ''
         ,lastName: ''
         ,dob:'' 
@@ -40,7 +51,9 @@ export const NewPlayer = () => {
             ,defense:0
             ,head:0
         }
-    }); 
+    } 
+
+    const [player, setPlayer] = useState<NewPlayerType>(existingPlayer? existingPlayer:{...blankPlayer})
     useEffect(() => {
         console.log(player)
     }, [player])
@@ -51,32 +64,77 @@ export const NewPlayer = () => {
     const modifyAttributes=(key:keyof(NewPlayerAttributes), value:number) => {
         setPlayer({...player, attributes: { ...player.attributes, [key]: value } })
     }
+    const onPositionChange = (newVal:Position) => {
+        setPosition(newVal)
+        setPlayer({...player, attributes: {...player.attributes, position: newVal}})
+    } 
+
+    const notAllMet = () : boolean => {
+        return player.firstName === null || 
+        player.lastName === null || 
+        player.attributes.defense === 0 || 
+        player.attributes.speed === 0 || 
+        player.attributes.stamina === 0 || 
+        player.attributes.shoot === 0 || 
+        player.attributes.pass === 0 || 
+        player.attributes.team === 0 || 
+        player.attributes.gk === 0 || 
+        player.attributes.dribble === 0 || 
+        player.attributes.iq === 0 || 
+        player.attributes.head === 0 
+    }
     const save = () => {
-        createPlayer({variables: { player } })
+        if (existingPlayer) {
+
+        } else {
+            createPlayer({variables: { player }, update: (cache,mutationResult) => {
+                if (mutationResult.data) {
+                    const player = mutationResult.data.CreatePlayer 
+                    var query = cache.readQuery<GetPlayersQuery>({ query: GetPlayersDocument })
+                    var players = query?.players 
+                    if (players) {
+                    cache.writeQuery<GetPlayersQuery>({query: GetPlayersDocument, data: { players: [...players, player]  } })
+                    }
+                }
+            }})
+            setPlayer({...blankPlayer})
+        }
     }
 
     return <div className="section grid" id="new-player">
-        <div className="grid-cell">
+        <div id="first-name-cell" className="grid-cell">
             <label htmlFor="first-name" >First Name</label>
             <input id="first-name" value={player.firstName} name="first-name" onChange={(e) => modify('firstName', e.target.value)} type="text"/>
         </div>
-        <div className="grid-cell">
+        <div id="last-name-cell" className="grid-cell">
             <label htmlFor="last-name">Last Name</label>
             <input id="last-name" value={player.lastName} name="last-name" onChange={(e) => modify('lastName', e.target.value)} type="text"/>
         </div>
-        <div className="flex">
+        <div id="position-cell" className="grid-cell flex">
+            <label htmlFor="position">Position</label>
+            {['GK', 'DEF', 'MID', 'FW'].map(it => <div key={'position-'+it}>
+                <input type="radio" checked={position===it} value={it} name="position" id={"position-"+it} onChange={(e) => onPositionChange(e.target.value as Position) } />
+                <label htmlFor={"position-"+it}>{it}</label>
+            </div>)}
+        </div>
+        <div id="attributes" className="grid-cell">
             <div>
               <label>Attributes</label>
             </div>
-        <div className="grid">
-            {numberAttributes.map(it => <div  key={it} className="grid-cell">
-                <label htmlFor={it}>{it}</label>
-                <AttributeSelector name={it} get={player.attributes[it] as number} set={(v) => modifyAttributes(it,Number(v))}></AttributeSelector>
-            </div>)}
+            <div id="attribute-wrapper">
+              {numberAttributes.map(it => 
+                <div key={it} className="grid-cell">
+                  <label htmlFor={it}>{it}</label>
+                  <AttributeSelector name={it} get={player.attributes[it] as number} set={(v) => modifyAttributes(it,Number(v))}></AttributeSelector>
+                 </div>
+              )}
+           </div>
         </div>
-        </div>
-        <div id="new-player-submit">
-            <button onClick={() => save()}>Save</button>
+        <div className="grid-cell" id="buttons">
+            <div id="buttons-wrapper" className="flex">
+                <button disabled={notAllMet()} onClick={() => save()}>Save</button>
+                <button onClick={() => onClose(false)}>Done</button>
+            </div>
         </div>
     </div>
 

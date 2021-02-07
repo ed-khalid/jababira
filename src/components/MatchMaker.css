@@ -1,0 +1,11 @@
+
+
+div#match-maker {
+    margin: 5px;
+    grid-template-columns: repeat(2,1fr) ;
+    row-gap: 10px; 
+    column-gap: 3px;
+}
+div#squads {
+    grid-column: 1 /-1;
+}

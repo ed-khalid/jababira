@@ -1,0 +1,10 @@
+
+ul {
+    list-style: none;
+}
+li {
+    cursor: pointer;
+}
+li.taken {
+    color: rgb(118, 118, 128);
+}

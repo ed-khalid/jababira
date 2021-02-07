@@ -1,0 +1,10 @@
+query GetLookups {
+  lookups{
+    venues {
+      id
+      name
+      address
+      type
+    }    
+  }
+}

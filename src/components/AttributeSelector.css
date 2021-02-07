@@ -9,6 +9,10 @@ input[type="checkbox"] {
     appearance: none;
     border:none;
 }
+input[type="checkbox"]:checked ~ label  {
+    background-color: white;
+    color: black;
+}
 label.checkbox-label {
     cursor: pointer;
     text-align:center;

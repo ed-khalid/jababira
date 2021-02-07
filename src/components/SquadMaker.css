@@ -1,0 +1,10 @@
+
+div.squad-maker {
+    border: 1px solid white;
+    height: 100%;
+    grid-template-columns: repeat(2,1fr)
+}
+
+div.squad-name {
+    grid-column: 1/ -1;
+}
