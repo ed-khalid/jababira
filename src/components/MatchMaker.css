@@ -9,3 +9,12 @@ div#match-maker {
 div#squads {
     grid-column: 1 /-1;
 }
+div#squads > :first-child {
+    order: 1;
+}
+div#squads > :nth-child(2) {
+    order: 3;
+}
+div#squads > :last-child {
+    order: 2;
+}

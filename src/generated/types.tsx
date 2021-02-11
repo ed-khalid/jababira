@@ -50,7 +50,11 @@ export type League = {
 
 export type Lookup = {
   __typename?: 'Lookup';
-  venues?: Maybe<Array<Venue>>;
+  venues: Array<Venue>;
+  colors: Array<Color>;
+  positions: Array<Position>;
+  nationalities: Array<Nationality>;
+  matchTypes?: Maybe<Array<Maybe<MatchType>>>;
 };
 
 export type Match = {
@@ -157,8 +161,16 @@ export type Squad = {
   name: Scalars['String'];
   color?: Maybe<Color>;
   dominantNationality?: Maybe<Nationality>;
-  hasUnknownPlayers?: Maybe<Scalars['Boolean']>;
-  players?: Maybe<Array<Player>>;
+  isJababiraSquad?: Maybe<Scalars['Boolean']>;
+  players?: Maybe<Array<SquadPlayer>>;
+};
+
+export type SquadPlayer = {
+  __typename?: 'SquadPlayer';
+  id: Scalars['String'];
+  player: Player;
+  position?: Maybe<Position>;
+  performanceRating: Scalars['Int'];
 };
 
 export type Venue = {
@@ -213,10 +225,10 @@ export type GetLookupsQuery = (
   { __typename?: 'Query' }
   & { lookups: (
     { __typename?: 'Lookup' }
-    & { venues?: Maybe<Array<(
+    & { venues: Array<(
       { __typename?: 'Venue' }
       & Pick<Venue, 'id' | 'name' | 'address' | 'type'>
-    )>> }
+    )> }
   ) }
 );
 

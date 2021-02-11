@@ -1,9 +1,8 @@
 import './App.css';
 import React, { useEffect, useState } from 'react';
 import { PlayerEditor } from './components/NewPlayer';
-import { Player, useGetLookupsQuery, useGetPlayersQuery } from './generated/types';
+import { Player, Position, useGetLookupsQuery, useGetPlayersQuery } from './generated/types';
 import { PlayerList } from './components/PlayerList';
-import { SquadMaker } from './components/SquadMaker';
 import { MatchMaker } from './components/MatchMaker';
 import { Card } from './components/Card';
 
@@ -11,6 +10,7 @@ export type PlayerFull = Player & { isFree:boolean }
 
 export const App = () => {
 
+  const positions = [Position.Gk, Position.Def, Position.Mid, Position.Fw] 
   const [isCreatingPlayer, setIsCreatingPlayer] = useState<boolean>(false);
   const [isMakingTeams, setIsMakingTeams] = useState<boolean>(false);
   const [showControls, setShowControls] = useState<boolean>(true);
@@ -18,14 +18,14 @@ export const App = () => {
   const [black, setBlack] = useState<Array<Player>>([])
   const [white, setWhite] = useState<Array<Player>>([])
   const [player, setPlayer] = useState<Player>();
-  const [players, setPlayers] = useState<Array<PlayerFull>>([])
+  const [allPlayers, setAllPlayers] = useState<Array<PlayerFull>>([])
   const lookups = useGetLookupsQuery()   
   const { data } = useGetPlayersQuery() 
   
   useEffect(() => {
     if (data && data.players) {
       const players:Array<PlayerFull> = data.players.map( it => ({...it, isFree:true}))   
-      setPlayers(players)
+      setAllPlayers(players)
     }
   }, [data])
 
@@ -55,18 +55,18 @@ export const App = () => {
       const isInWhite = white.find(it => it.id === player.id)  
       if (!isInBlack && !isInWhite) {
         setBlack([...black, player])
-        const _players = players.filter(it => it.id !== player.id)   
+        const _players = allPlayers.filter(it => it.id !== player.id)   
         player.isFree = false
-        setPlayers([..._players, player ])
+        setAllPlayers([..._players, player ])
       }
       else if (isInBlack) {
         setBlack(black.filter(it => it.id !== player.id))
         setWhite([...white, player])
       } else {
         setWhite(white.filter(it => it.id !== player.id))
-        const _players = players.filter(it => it.id !== player.id)   
+        const _players = allPlayers.filter(it => it.id !== player.id)   
         player.isFree = true
-        setPlayers([..._players, player ])
+        setAllPlayers([..._players, player ])
       } 
     }
   }
@@ -74,7 +74,7 @@ export const App = () => {
   return <div id ="app" className="grid">
     <header>Jababira</header>
     <section id="sidebar">
-      {data?.players && <PlayerList showPlayer={setPlayer} players={players} togglePlayer={togglePlayer} ></PlayerList>}
+      {data?.players && <PlayerList showPlayer={setPlayer} players={allPlayers} togglePlayer={togglePlayer} ></PlayerList>}
     </section>
     <section id="main">
       {showControls && <div id="main-controls">
@@ -85,8 +85,9 @@ export const App = () => {
       <div id="main-section">
           {isCreatingPlayer && <PlayerEditor existingPlayer={player} onClose={setIsCreatingPlayer}  ></PlayerEditor>}
           {/* {isMakingTeams && <SquadMaker black={black} white={white}></SquadMaker>} */}
-          {showNewMatch && <Card header="New Match">
-            <MatchMaker lookupsData={lookups.data}></MatchMaker>
+          {showNewMatch && 
+            <Card header="New Match">
+              <MatchMaker positions={positions} allPlayers={allPlayers.filter( it => it.isFree)} setAllPlayers={setAllPlayers} lookupsData={lookups.data}></MatchMaker>
             </Card> }
       </div>
     </section>

@@ -1,15 +1,21 @@
-import React, { useEffect, useState } from "react";
-import { GetLookupsQuery, Match, MatchType, Squad, VenueType } from "../generated/types"
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { PlayerFull } from "../App";
+import { GetLookupsQuery, Match, MatchType, Position, Squad, VenueType } from "../generated/types"
 import './MatchMaker.css'
+import { PlayerPicker } from "./PlayerPicker";
 import { SquadMaker } from "./SquadMaker";
 
 interface Props {
     lookupsData:GetLookupsQuery|undefined
+    allPlayers:Array<PlayerFull>
+    setAllPlayers:Dispatch<SetStateAction<Array<PlayerFull>>>
+    positions:Array<Position>
 }
 
-export const MatchMaker = ({lookupsData}:Props) => {
+export const MatchMaker = ({lookupsData, positions, allPlayers, setAllPlayers}:Props) => {
     const [match,setMatch]  = useState<Match>({id: '', name: '', location: { id : '', name: '', address: '', type: VenueType.Indoor  }, type: MatchType.Casual, squads: []  });
     const [squads, setSquads] = useState<Array<Squad>>([]) 
+    const [playerBeingDragged, setPlayerBeingDragged] = useState<PlayerFull>();
 
     useEffect(() => {
         console.log(squads)
@@ -56,7 +62,8 @@ export const MatchMaker = ({lookupsData}:Props) => {
             {[2,3].map(it =>  <option value={it}>{it}</option>)}
         </select>
         {squads.length && <div id="squads" className="flex">
-            {squads.map((squad,index) => <SquadMaker setSquad={setSquad(index)} squad={squad}></SquadMaker> )}
+            {squads.map((squad,index) => <SquadMaker setAllPlayers={setAllPlayers} playerBeingDragged={playerBeingDragged} setPlayerBeingDragged={setPlayerBeingDragged} positions={positions} allPlayers={allPlayers} setSquad={setSquad(index)} squad={squad}></SquadMaker> )}
+            <PlayerPicker setPlayerBeingDragged={setPlayerBeingDragged} allPlayers={allPlayers}></PlayerPicker>
         </div>}
     </div>
 }

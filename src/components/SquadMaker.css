@@ -2,9 +2,23 @@
 div.squad-maker {
     border: 1px solid white;
     height: 100%;
-    grid-template-columns: repeat(2,1fr)
+    grid-template-columns: repeat(2,1fr);
+    grid-template-rows: 10% auto;  
 }
 
 div.squad-name {
     grid-column: 1/ -1;
+}
+div.squad-players {
+    grid-column: 1/-1; 
+}
+div.dropzone {
+    border:1px solid white;
+    margin: 5px;
+    width: 97%;
+    height: 85%;
+}
+div.dropzone.active {
+    background-color: gray; 
+    opacity: 0.5;
 }

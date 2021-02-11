@@ -1,0 +1,12 @@
+
+
+div.player-picker {
+    grid-template-columns: repeat(2,1fr);
+}
+
+div.squad-player-row {
+    justify-content: space-between 
+}
+li.squad-player-option {
+    cursor: move;
+}
