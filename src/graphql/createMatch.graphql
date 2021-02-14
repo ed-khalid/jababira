@@ -1,0 +1,6 @@
+
+mutation CreateMatch($match:NewMatch!) {
+    CreateMatch(match:$match) {
+        id
+    }
+}

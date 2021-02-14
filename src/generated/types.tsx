@@ -25,21 +25,7 @@ export type ExistingPlayer = {
   lastName?: Maybe<Scalars['String']>;
   dob?: Maybe<Scalars['String']>;
   picture?: Maybe<Scalars['String']>;
-  attributes?: Maybe<ExistingPlayerAttributes>;
-};
-
-export type ExistingPlayerAttributes = {
-  position?: Maybe<Position>;
-  speed?: Maybe<Scalars['Int']>;
-  dribble?: Maybe<Scalars['Int']>;
-  pass?: Maybe<Scalars['Int']>;
-  gk?: Maybe<Scalars['Int']>;
-  team?: Maybe<Scalars['Int']>;
-  stamina?: Maybe<Scalars['Int']>;
-  shoot?: Maybe<Scalars['Int']>;
-  defense?: Maybe<Scalars['Int']>;
-  head?: Maybe<Scalars['Int']>;
-  iq?: Maybe<Scalars['Int']>;
+  attributes?: Maybe<PlayerAttributesInput>;
 };
 
 export type League = {
@@ -60,8 +46,9 @@ export type Lookup = {
 export type Match = {
   __typename?: 'Match';
   id: Scalars['String'];
-  name: Scalars['String'];
   location: Venue;
+  date: Scalars['String'];
+  time: Scalars['String'];
   type: MatchType;
   squads: Array<Squad>;
   league?: Maybe<League>;
@@ -76,12 +63,18 @@ export enum MatchType {
 export type Mutation = {
   __typename?: 'Mutation';
   CreatePlayer: Player;
+  CreateMatch: Match;
   UpdatePlayer: Player;
 };
 
 
 export type MutationCreatePlayerArgs = {
   player: NewPlayer;
+};
+
+
+export type MutationCreateMatchArgs = {
+  match: NewMatch;
 };
 
 
@@ -92,29 +85,42 @@ export type MutationUpdatePlayerArgs = {
 export enum Nationality {
   Iraq = 'IRAQ',
   Sudan = 'SUDAN',
-  Libya = 'LIBYA'
+  Libya = 'LIBYA',
+  Iran = 'IRAN',
+  Palestine = 'PALESTINE',
+  SaudiArabia = 'SAUDI_ARABIA'
 }
+
+export type NewMatch = {
+  venueId: Scalars['String'];
+  date: Scalars['String'];
+  time: Scalars['String'];
+  type: MatchType;
+  squads: Array<NewSquad>;
+  leagueId?: Maybe<Scalars['String']>;
+};
 
 export type NewPlayer = {
   firstName: Scalars['String'];
   lastName: Scalars['String'];
   dob?: Maybe<Scalars['String']>;
   picture?: Maybe<Scalars['String']>;
-  attributes: NewPlayerAttributes;
+  attributes: PlayerAttributesInput;
 };
 
-export type NewPlayerAttributes = {
-  position: Position;
-  speed: Scalars['Int'];
-  dribble: Scalars['Int'];
-  pass: Scalars['Int'];
-  gk?: Maybe<Scalars['Int']>;
-  team: Scalars['Int'];
-  stamina: Scalars['Int'];
-  shoot: Scalars['Int'];
-  defense: Scalars['Int'];
-  head: Scalars['Int'];
-  iq: Scalars['Int'];
+export type NewSquad = {
+  color?: Maybe<Color>;
+  dominantNationality?: Maybe<Nationality>;
+  captainId: Scalars['String'];
+  isJababiraSquad?: Maybe<Scalars['Boolean']>;
+  players?: Maybe<Array<NewSquadPlayer>>;
+  score?: Maybe<Scalars['Int']>;
+};
+
+export type NewSquadPlayer = {
+  playerId: Scalars['String'];
+  position?: Maybe<Position>;
+  performanceRating: Scalars['Int'];
 };
 
 export type Player = {
@@ -124,6 +130,9 @@ export type Player = {
   lastName: Scalars['String'];
   picture?: Maybe<Scalars['String']>;
   dob?: Maybe<Scalars['String']>;
+  nationality?: Maybe<Nationality>;
+  height?: Maybe<Scalars['Float']>;
+  weight?: Maybe<Scalars['Float']>;
   attributes: PlayerAttributes;
 };
 
@@ -138,6 +147,20 @@ export type PlayerAttributes = {
   team: Scalars['Int'];
   defense: Scalars['Int'];
   stamina: Scalars['Int'];
+  head: Scalars['Int'];
+  iq: Scalars['Int'];
+};
+
+export type PlayerAttributesInput = {
+  position: Position;
+  speed: Scalars['Int'];
+  dribble: Scalars['Int'];
+  pass: Scalars['Int'];
+  gk?: Maybe<Scalars['Int']>;
+  team: Scalars['Int'];
+  stamina: Scalars['Int'];
+  shoot: Scalars['Int'];
+  defense: Scalars['Int'];
   head: Scalars['Int'];
   iq: Scalars['Int'];
 };
@@ -161,8 +184,10 @@ export type Squad = {
   name: Scalars['String'];
   color?: Maybe<Color>;
   dominantNationality?: Maybe<Nationality>;
+  captain?: Maybe<Player>;
   isJababiraSquad?: Maybe<Scalars['Boolean']>;
   players?: Maybe<Array<SquadPlayer>>;
+  score?: Maybe<Scalars['Int']>;
 };
 
 export type SquadPlayer = {
@@ -185,6 +210,19 @@ export enum VenueType {
   Indoor = 'INDOOR',
   Outdoor = 'OUTDOOR'
 }
+
+export type CreateMatchMutationVariables = Exact<{
+  match: NewMatch;
+}>;
+
+
+export type CreateMatchMutation = (
+  { __typename?: 'Mutation' }
+  & { CreateMatch: (
+    { __typename?: 'Match' }
+    & Pick<Match, 'id'>
+  ) }
+);
 
 export type CreatePlayerMutationVariables = Exact<{
   player: NewPlayer;
@@ -233,6 +271,38 @@ export type GetLookupsQuery = (
 );
 
 
+export const CreateMatchDocument = gql`
+    mutation CreateMatch($match: NewMatch!) {
+  CreateMatch(match: $match) {
+    id
+  }
+}
+    `;
+export type CreateMatchMutationFn = Apollo.MutationFunction<CreateMatchMutation, CreateMatchMutationVariables>;
+
+/**
+ * __useCreateMatchMutation__
+ *
+ * To run a mutation, you first call `useCreateMatchMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateMatchMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createMatchMutation, { data, loading, error }] = useCreateMatchMutation({
+ *   variables: {
+ *      match: // value for 'match'
+ *   },
+ * });
+ */
+export function useCreateMatchMutation(baseOptions?: Apollo.MutationHookOptions<CreateMatchMutation, CreateMatchMutationVariables>) {
+        return Apollo.useMutation<CreateMatchMutation, CreateMatchMutationVariables>(CreateMatchDocument, baseOptions);
+      }
+export type CreateMatchMutationHookResult = ReturnType<typeof useCreateMatchMutation>;
+export type CreateMatchMutationResult = Apollo.MutationResult<CreateMatchMutation>;
+export type CreateMatchMutationOptions = Apollo.BaseMutationOptions<CreateMatchMutation, CreateMatchMutationVariables>;
 export const CreatePlayerDocument = gql`
     mutation CreatePlayer($player: NewPlayer!) {
   CreatePlayer(player: $player) {

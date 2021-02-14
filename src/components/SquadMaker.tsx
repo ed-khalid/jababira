@@ -1,7 +1,9 @@
 import React, { Dispatch, SetStateAction, useState } from 'react'
 import { PlayerFull } from '../App'
-import { Color, Player, Position, Squad, SquadPlayer } from '../generated/types'
-import { Slider } from './Slider'
+import { Color, Nationality, Player, Position, Squad, SquadPlayer } from '../generated/types'
+import { fullName } from '../models/Player'
+import { Dropzone } from './Common/Dropzone'
+import { Slider } from './Common/Slider'
 import './SquadMaker.css'
 interface Props {
     squad:Squad
@@ -23,8 +25,8 @@ enum SquadType {
 export const SquadMaker = ({positions, squad, setSquad, playerBeingDragged, setPlayerBeingDragged, allPlayers, setAllPlayers}:Props) => {
 
     const [squadType, setSquadType] = useState<SquadType>()
-    const [isOverDropzone, setIsOverDropzone] = useState<boolean>(false);
     const colors = [Color.Black, Color.White, Color.Red] 
+    const nationalities = [Nationality.Iraq, Nationality.Iran, Nationality.Libya, Nationality.Palestine, Nationality.SaudiArabia, Nationality.Sudan]
     const addPlayerToSquad = (player:PlayerFull|undefined) => {
         if (player) {
             const newSquad = {...squad}
@@ -39,6 +41,9 @@ export const SquadMaker = ({positions, squad, setSquad, playerBeingDragged, setP
             setPlayerBeingDragged(undefined)
         }
     } 
+    const updateScore = (score:number) =>  {
+        setSquad({...squad, score})
+    }
     const updatePlayerPosition = (player:SquadPlayer, newPosition:Position) => {
         player.position = newPosition
         const otherPlayers = squad.players?.filter(it => it.id !== player.id)
@@ -53,14 +58,30 @@ export const SquadMaker = ({positions, squad, setSquad, playerBeingDragged, setP
         const newSquad:Squad = { ...squad, players:newPlayers}
         setSquad(newSquad)
     } 
-    const onDragOver =  (e:React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-    }   
 
-    const squadPlayersSort = (a:SquadPlayer, b:SquadPlayer) => {
+    const updateSquadType = (newSquadType:SquadType) => {
+        setSquadType(newSquadType)
+        const newSquad:Squad = { ...squad, isJababiraSquad: newSquadType === SquadType.JABABIRA}
+        setSquad(newSquad)
+    }
+
+    const addCaptain = (player:PlayerFull|undefined) => {
+        setSquad({...squad, captain: player })
+    }
+
+    const squadPlayerSortByName = (aName:string, bName:string) : number => {
+        if (aName === bName) return 0;
+        if (aName < bName) return 1;
+        return -1;
+    }
+
+    const squadPlayersSortByPosition = (a:SquadPlayer, b:SquadPlayer) : number => {
         const priorities = [Position.Gk, Position.Def, Position.Mid, Position.Fw];  
         if (a.position && b.position) {
-            if (priorities.indexOf(a.position) < priorities.indexOf(b.position)) {
+            if (priorities.indexOf(a.position) === priorities.indexOf(b.position)) {
+                return squadPlayerSortByName(fullName(a.player), fullName(b.player))
+            }
+            else if (priorities.indexOf(a.position) < priorities.indexOf(b.position)) {
                 return -1;
             } else {
                 return 1;
@@ -73,31 +94,31 @@ export const SquadMaker = ({positions, squad, setSquad, playerBeingDragged, setP
     }     
 
     return <div className="squad-maker grid">
-        <div>
             <label>Squad Type</label>
-            <select value={squadType} onChange={it => setSquadType(it.target.value as unknown as SquadType) }>
+            <select value={squadType} onChange={it => updateSquadType(it.target.value as unknown as SquadType) }>
                 <option value={undefined}>Select</option>
                 <option value={SquadType.JABABIRA}>Jababira Squad</option>
                 <option value={SquadType.OTHER}>Guest Squad</option>
             </select>
-        </div>
-        <div>
         <label>Color</label>
         <select value={squad.color||undefined} onChange={it => setSquad({...squad, color: it.target.value as unknown as Color  })}   >
             <option value={undefined}>Select</option>
             {colors.map(it => <option value={it}>{it}</option> )}
         </select>
-        </div>
-        {squadType == SquadType.JABABIRA && 
-        <React.Fragment>
+        <label>Dominant Nationality</label>
+        <select value={squad.dominantNationality||undefined} onChange={it => setSquad({...squad, dominantNationality: it.target.value as unknown as Nationality  })}   >
+            <option value={undefined}>Select</option>
+            {nationalities.map(it => <option value={it}>{it}</option> )}
+        </select>
+        <label>Captain</label>
+        <Dropzone handleDrop={ () => addCaptain(playerBeingDragged) }>
+          <input placeholder="Drag player to set" readOnly={true} type="text" value={fullName(squad.captain)} />
+        </Dropzone>
+        <label>Score</label>
+        <input type="text" value={squad.score || 0} onChange={e => updateScore(Number(e.target.value)) } />
             <div className="squad-players">
                 <label>Players</label>
-                <div className={"dropzone" + ((isOverDropzone) ? ' active' : '')    }
-                     onDragEnter={ e => setIsOverDropzone(true)}
-                     onDragLeave={ e => setIsOverDropzone(false)}
-                     onDragOver={e => onDragOver(e) } 
-                     onDrop={e => addPlayerToSquad(playerBeingDragged) }
-                >
+                <Dropzone handleDrop={() => addPlayerToSquad(playerBeingDragged)}>
                     <table>
                         <thead>
                             <tr>
@@ -108,7 +129,7 @@ export const SquadMaker = ({positions, squad, setSquad, playerBeingDragged, setP
                             </tr>
                         </thead>
                         <tbody>
-                        {squad.players?.sort(squadPlayersSort).map((squadPlayer,index) => <tr 
+                        {squad.players?.sort(squadPlayersSortByPosition).map((squadPlayer,index) => <tr 
                           key={'squad-player-'+squadPlayer.id}>
                               <td>{index+1}</td>
                               <td>
@@ -127,19 +148,8 @@ export const SquadMaker = ({positions, squad, setSquad, playerBeingDragged, setP
                         )}
                         </tbody>
                     </table>
-                    <ul>
-                    </ul>
-
+                </Dropzone>
                 </div>
-            </div>
-        </React.Fragment>
-        }
-        {squadType == SquadType.OTHER && 
-        <React.Fragment>
-            <label>Captain</label>
-            <div></div>
-        </React.Fragment>
-        }
     </div>
 
 

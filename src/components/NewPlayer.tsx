@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { GetPlayersDocument, GetPlayersQuery, NewPlayer as NewPlayerType, NewPlayerAttributes, Player, Position, useCreatePlayerMutation} from "../generated/types";
+import { GetPlayersDocument, GetPlayersQuery, NewPlayer as NewPlayerType, Player, PlayerAttributesInput, Position, useCreatePlayerMutation} from "../generated/types";
 import { AttributeSelector } from "./AttributeSelector";
 import './NewPlayer.css'
 
@@ -21,7 +21,7 @@ export const PlayerEditor = ({existingPlayer, onClose}:Props) => {
 
     }, [existingPlayer])
 
-    const numberAttributes:Array<keyof(NewPlayerAttributes)> = [
+    const numberAttributes:Array<keyof(PlayerAttributesInput)> = [
         'gk',
         'pass',
         'shoot',
@@ -61,7 +61,7 @@ export const PlayerEditor = ({existingPlayer, onClose}:Props) => {
     const modify = (key:keyof(NewPlayerType), value:string) => {
           setPlayer({...player, [key]: value  })
     } 
-    const modifyAttributes=(key:keyof(NewPlayerAttributes), value:number) => {
+    const modifyAttributes=(key:keyof(PlayerAttributesInput), value:number) => {
         setPlayer({...player, attributes: { ...player.attributes, [key]: value } })
     }
     const onPositionChange = (newVal:Position) => {

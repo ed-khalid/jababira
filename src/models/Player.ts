@@ -1,4 +1,4 @@
 import { Player } from "../generated/types";
 
 
-export const fullName = (player:Player) => player.firstName + ' ' + player.lastName  
+export const fullName = (player:Player | null | undefined) => (!player) ? '' :  player.firstName + ' ' + player.lastName  

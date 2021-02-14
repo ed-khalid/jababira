@@ -1,0 +1,5 @@
+
+div.dropzone.active {
+    background-color: gray; 
+    opacity: 0.5;
+}

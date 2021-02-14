@@ -3,8 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { PlayerEditor } from './components/NewPlayer';
 import { Player, Position, useGetLookupsQuery, useGetPlayersQuery } from './generated/types';
 import { PlayerList } from './components/PlayerList';
-import { MatchMaker } from './components/MatchMaker';
-import { Card } from './components/Card';
+import { MatchMaker } from './components/MatchMaker/MatchMaker';
 
 export type PlayerFull = Player & { isFree:boolean }   
 
@@ -71,6 +70,7 @@ export const App = () => {
     }
   }
 
+
   return <div id ="app" className="grid">
     <header>Jababira</header>
     <section id="sidebar">
@@ -86,9 +86,8 @@ export const App = () => {
           {isCreatingPlayer && <PlayerEditor existingPlayer={player} onClose={setIsCreatingPlayer}  ></PlayerEditor>}
           {/* {isMakingTeams && <SquadMaker black={black} white={white}></SquadMaker>} */}
           {showNewMatch && 
-            <Card header="New Match">
-              <MatchMaker positions={positions} allPlayers={allPlayers.filter( it => it.isFree)} setAllPlayers={setAllPlayers} lookupsData={lookups.data}></MatchMaker>
-            </Card> }
+            <MatchMaker positions={positions} allPlayers={allPlayers} setAllPlayers={setAllPlayers} lookupsData={lookups.data}></MatchMaker>
+          }
       </div>
     </section>
   </div>
