@@ -44,8 +44,8 @@ export const SquadMaker = ({positions, squad, setSquad, playerBeingDragged, setP
     const updateScore = (score:number) =>  {
         setSquad({...squad, score})
     }
-    const updatePlayerPosition = (player:SquadPlayer, newPosition:Position) => {
-        player.position = newPosition
+    const updatePlayerPosition = (player:SquadPlayer, newPosition:string) => {
+        player.position = newPosition as Position
         const otherPlayers = squad.players?.filter(it => it.id !== player.id)
         const newPlayers = [...otherPlayers!, player] 
         const newSquad:Squad = { ...squad, players:newPlayers}
@@ -133,7 +133,7 @@ export const SquadMaker = ({positions, squad, setSquad, playerBeingDragged, setP
                           key={'squad-player-'+squadPlayer.id}>
                               <td>{index+1}</td>
                               <td>
-                                <select onChange={(e) => updatePlayerPosition(squadPlayer, e.target.value as Position) } value={squadPlayer.position || undefined }>
+                                <select onChange={(e) => updatePlayerPosition(squadPlayer, e.target.value) } value={squadPlayer.position || undefined }>
                                     <option value={undefined}>Select</option>
                                     {positions.map(p => <option value={p}>{p}</option>)}
                                 </select>

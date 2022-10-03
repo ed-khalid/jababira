@@ -1,3 +1,4 @@
+import { lookupService } from "dns"
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react"
 import { PlayerFull } from "../../App"
 import { GetLookupsQuery, Match, MatchType, Position, useCreateMatchMutation, VenueType } from "../../generated/types"
@@ -14,6 +15,7 @@ interface Props {
 
 export const MatchMaker = ({positions, allPlayers, setAllPlayers, lookupsData}:Props)  => {
         const [match,setMatch]  = useState<Match>({id: '', date:'', time:'', location: { id : '', name: '', address: '', type: VenueType.Indoor  }, type: MatchType.Casual, squads: []  });
+        const matchTypes = [MatchType.Casual, MatchType.Friendly, MatchType.League] 
         const [createMatch, createMatchResults] = useCreateMatchMutation()
 
         const saveMatch = () => {
@@ -25,7 +27,9 @@ export const MatchMaker = ({positions, allPlayers, setAllPlayers, lookupsData}:P
                 squads: match.squads.map(mapSquadToSquadInput)
             }  
             debugger
-            createMatch({variables: { match: newMatch}})
+            createMatch({variables: { match: newMatch}}).then(succ => {}, err => {
+                console.log(err)
+            } )
         }
         const updateMatch = (key:keyof Match, value:Match[keyof Match]) => {
             if (key === 'location') {
@@ -33,7 +37,15 @@ export const MatchMaker = ({positions, allPlayers, setAllPlayers, lookupsData}:P
                 if (newLocation) {
                   setMatch({...match, ...{[key]: newLocation }})
                 }
-            } else {
+            } 
+            else if (key === 'type') {
+                const newType = matchTypes.find(it => it.toString() === value) 
+                if (newType) {
+                    setMatch({...match,...{[key]: newType}})
+                }
+            }
+            
+            else {
                 const newMatch = {...match, ...{[key]: value}}
                 setMatch({...newMatch})
             }

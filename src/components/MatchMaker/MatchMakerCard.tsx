@@ -43,7 +43,7 @@ export const MatchMakerCard = ({match, updateMatch, lookupsData, positions, allP
         <label>Venue</label>
         <select value={match.location.id} onChange={it => updateMatch('location', it.target.value) }>
           <option value={undefined}>Select</option>
-          {lookupsData?.lookups?.venues?.map(venue => <option value={venue.id}>{venue.name}</option>)}
+          {lookupsData?.lookups?.venues?.map(venue => <option key={'venue-'+venue.id} value={venue.id}>{venue.name}</option>)}
         </select>
         <label>Date</label>
         <input value={match.date} onChange={it => updateMatch('date', it.target.value) } type="date"/>
@@ -52,12 +52,12 @@ export const MatchMakerCard = ({match, updateMatch, lookupsData, positions, allP
         <label >Type</label>
         <select value={match.type} onChange={it => updateMatch('type', it.target.value) }>
           <option value={undefined}>Select</option>
-          {[MatchType.Casual, MatchType.Friendly, MatchType.League].map(matchType => <option value={matchType}>{matchType}</option>)}
+          {[MatchType.Casual, MatchType.Friendly, MatchType.League].map(matchType => <option key={'match-type-' + matchType.toLowerCase()} value={matchType}>{matchType}</option>)}
         </select>
         <label>Number of Squads</label>
         <select onChange={it => handleNumberOfSquads(it.target.value)  }>
             <option value={undefined}>Select</option>
-            {[2,3].map(it =>  <option value={it}>{it}</option>)}
+            {[2,3].map(it =>  <option key={'squad-choice-' + it} value={it}>{it}</option>)}
         </select>
         {match.squads.length && <div id="squads" className="flex">
             {match.squads.map((squad,index) => <SquadMaker setAllPlayers={setAllPlayers} playerBeingDragged={playerBeingDragged} setPlayerBeingDragged={setPlayerBeingDragged} positions={positions} allPlayers={allPlayers} setSquad={setSquad(index)} squad={squad}></SquadMaker> )}
