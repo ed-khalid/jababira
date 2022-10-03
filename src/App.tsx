@@ -1,5 +1,5 @@
 import './App.css';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PlayerEditor } from './components/NewPlayer';
 import { Player, Position, useGetLookupsQuery, useGetPlayersQuery } from './generated/types';
 import { PlayerList } from './components/PlayerList';
